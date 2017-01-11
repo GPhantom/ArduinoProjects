@@ -1,0 +1,102 @@
+/* How to use a flex sensor/resistro - Arduino Tutorial
+
+   Fade an LED with a flex sensor
+
+   More info: http://www.ardumotive.com/how-to-use-a-flex-sensor-en.html
+
+   Dev: Michalis Vasilakis // Date: 9/7/2015 // www.ardumotive.com  */
+
+#include <IRremote.h>   
+
+
+
+//Constants:
+
+const int ledPin = 3; //pin 3 has PWM funtion
+
+const int flexPin_s = A0;
+
+const int flexPin_m = A1;//pin A0 to read analog input
+
+int buzzer = 12;
+
+//Variables:
+
+int value_s;
+int value_m;//save analog value
+
+IRsend irsend;
+
+
+
+void setup(){
+
+  
+  pinMode(buzzer, OUTPUT);
+  pinMode(ledPin, OUTPUT);  //Set pin 3 as 'output'
+
+  Serial.begin(9600);       //Begin serial communication
+
+
+
+}
+
+
+
+void loop(){
+
+  
+
+  value_s = analogRead(flexPin_s);
+  value_m = analogRead(flexPin_m);
+  //Serial.println(value);
+  value_s = map(value, 700, 900, 0, 255);
+  value_m = map(value, 700, 900, 0, 255);//Map value 0-1023 to 0-255 (PWM)
+
+  analogWrite(ledPin_s, value_s);
+  analogWrite(ledPin_m, value_m);  //Send PWM value to led
+
+  delay(100);  //Read and save analog value from potentiometer
+  Serial.print("Flex_s = ");
+  Serial.println(value_s);
+  Serial.print("Flex_m = ");
+  Serial.println(value_m);
+  
+  if (value > 100 & value < 150){
+    
+    
+    irsend.sendSony(0xa90, 12);
+    delay(50);
+    irsend.sendSony(0xa90, 12);
+    delay(50);
+    irsend.sendSony(0xa90, 12);
+    digitalWrite(buzzer, 12);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+  }
+  else if (value < 10 ){
+    irsend.sendSony(0x10, 12);
+    delay(50);
+    irsend.sendSony(0x10, 12);
+    delay(50);
+    irsend.sendSony(0x10, 12);
+    digitalWrite(buzzer, 12);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+
+   
+  }
+  else if (value > 150){
+    irsend.sendSony(0x20, 12);
+    delay(50);
+    irsend.sendSony(0x20, 12);
+    delay(50);
+    irsend.sendSony(0x20, 12);
+    digitalWrite(buzzer, 12);
+    delay(50);
+    digitalWrite(buzzer, LOW);
+    
+    
+  }
+
+}
